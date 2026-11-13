@@ -220,14 +220,17 @@ impl DVRIPCam {
         data: Value,
         wait_response: bool,
     ) -> Result<Option<Value>> {
-        let Some(data) = self
+        let rtn = self
             .send_command_recv_bin(msg_id, data, wait_response)
-            .await?
-            .map(|x| serde_json::from_slice(&x[..x.len() - 2]))
-        else {
-            return Ok(None);
-        };
-        data.map_err(|_| DVRIPError::SerializationError("Failed to parse JSON Header".to_owned()))
+            .await?;
+        if let Some(mut data) = rtn {
+            // println!("{:#?}", data);
+            data.retain(|b| *b!=0u8);
+            serde_json::from_slice(&data)
+                .map_err(|_| DVRIPError::SerializationError("Failed to parse JSON Header".to_owned()))
+        } else {
+            Ok(None)
+        }
     }
 
     pub(crate) async fn get_command(&self, command: &str, code: Option<u32>) -> Result<Value> {
