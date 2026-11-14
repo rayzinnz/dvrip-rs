@@ -73,6 +73,10 @@ path = "examples/realtime_stream.rs"
 name = "recordings_manager"
 path = "examples/recordings_manager.rs"
 
+[[example]]
+name = "take_snapshot"
+path = "examples/take_snapshot.rs"
+
 [dependencies.async-trait]
 version = "0.1.89"
 

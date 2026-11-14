@@ -33,6 +33,10 @@ pub trait Authentication: Send + Sync {
 #[async_trait]
 impl Authentication for DVRIPCam {
     async fn login(&mut self, username: &str, password: &str) -> Result<bool> {
+        if self.is_authenticated() {
+            return Ok(true);
+        }
+
         if !Connection::is_connected(self) {
             Connection::connect(self, self.timeout).await?;
         }
