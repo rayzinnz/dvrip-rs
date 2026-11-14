@@ -85,6 +85,9 @@ pub struct DVRIPCam {
     pub(crate) backchannel_buffer: Arc<Mutex<Vec<u8>>>,
 
     pub send_pool: Arc<Option<sync::mpsc::Sender<CommandRequest>>>,
+
+    serial_no: String,
+    title: String,
 }
 
 impl DVRIPCam {
@@ -113,6 +116,8 @@ impl DVRIPCam {
             backchannel_buffer: Arc::new(Mutex::new(Vec::new())),
             send_pool: Arc::new(None),
             stream_handlers: Arc::new(DashMap::new()),
+            serial_no: String::new(),
+            title: String::new()
         }
     }
 
@@ -336,4 +341,32 @@ impl DVRIPCam {
 
         *self.keep_alive_handle.lock().await = Some(handle);
     }
+
+    pub async fn get_serial_no(&mut self) -> String {
+        if self.serial_no.is_empty() {
+            self.serial_no = 
+                match crate::SystemInfo::get_system_info(self).await {
+                    Ok(system_info) => {
+                        match system_info.get("SerialNo") {
+                            Some(serial_no) => serial_no.to_string(),
+                            None => String::new()
+                        }
+                    }
+                    Err(_) => String::new()
+                }
+        }
+        self.serial_no.to_string()
+    }
+
+    pub async fn get_title(&mut self) -> String {
+        if self.title.is_empty() {
+            self.title =
+                match crate::SystemInfo::get_channel_titles(self).await {
+                    Ok(titles) => titles[0].to_string(),
+                    Err(_) => String::new()
+                }
+        }
+        self.title.to_string()
+    }
+
 }
