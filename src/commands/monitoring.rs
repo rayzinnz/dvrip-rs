@@ -132,6 +132,7 @@ impl DVRIPCam {
         let mut length = 0u32;
         let frame_len;
 
+        let data_type_u16 = BigEndian::read_u16(&packet[0..2]);
         let data_type = BigEndian::read_u32(&packet[0..4]);
         if data_type == 0x1FC || data_type == 0x1FE {
             frame_len = 16;
@@ -175,7 +176,7 @@ impl DVRIPCam {
                 length = LittleEndian::read_u16(&packet[6..8]) as u32;
                 metadata.media_type = Self::internal_to_type_static(data_type, media);
             }
-        } else if data_type == 0xFFD8FFE0 {
+        } else if data_type_u16 == 0xFFD8 {
             return Ok((packet, metadata));
         } else {
             return Err(crate::error::DVRIPError::ProtocolError(format!(
