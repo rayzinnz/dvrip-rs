@@ -55,6 +55,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Err(e) => eprintln!("Error getting system capabilities: {}", e),
     }
 
+    println!("\n--- Helper functions ---");
+    println!("{}", cam.get_serial_no().await);
+    println!("{}", cam.get_title().await);
+
     // 5. Close connection
     cam.close().await?;
     println!("\nDisconnected.");

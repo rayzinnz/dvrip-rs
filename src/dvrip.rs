@@ -348,7 +348,7 @@ impl DVRIPCam {
                 match crate::SystemInfo::get_system_info(self).await {
                     Ok(system_info) => {
                         match system_info.get("SerialNo") {
-                            Some(serial_no) => serial_no.to_string(),
+                            Some(serial_no) => serial_no.as_str().unwrap_or_default().to_string(),
                             None => String::new()
                         }
                     }
