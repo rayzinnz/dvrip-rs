@@ -58,6 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n--- Helper functions ---");
     println!("{}", cam.get_serial_no().await);
     println!("{}", cam.get_title().await);
+    println!("{}", cam.has_ptz().await);
 
     // 5. Close connection
     cam.close().await?;

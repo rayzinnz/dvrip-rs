@@ -88,6 +88,7 @@ pub struct DVRIPCam {
 
     serial_no: String,
     title: String,
+    has_ptz_p: Option<bool>,
 }
 
 impl DVRIPCam {
@@ -117,7 +118,8 @@ impl DVRIPCam {
             send_pool: Arc::new(None),
             stream_handlers: Arc::new(DashMap::new()),
             serial_no: String::new(),
-            title: String::new()
+            title: String::new(),
+            has_ptz_p: None,
         }
     }
 
@@ -368,5 +370,30 @@ impl DVRIPCam {
         }
         self.title.to_string()
     }
+
+    pub async fn has_ptz(&mut self) -> bool {
+        match self.has_ptz_p {
+            Some(has_ptz_some) => has_ptz_some,
+            None => {
+                self.has_ptz_p = Some(
+                    match crate::SystemInfo::get_system_capabilities(self).await {
+                        Ok(capabilities) => match capabilities.get("OtherFunction") {
+                            Some(other_function) => match other_function.as_object() {
+                                Some(other_functions) => other_functions.iter().any(|ofn| 
+                                    ofn.0.starts_with("SupportPTZ") &&
+                                    ofn.1.as_bool().unwrap_or_default()
+                                ),
+                                None => false
+                            },
+                            None => false,
+                        },
+                        Err(_) => false
+                    }
+                );
+
+                self.has_ptz_p.unwrap_or_default()
+            }
+        }
+   }
 
 }
